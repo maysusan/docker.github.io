@@ -13,15 +13,10 @@ This feature is available only if Docker has been built with `seccomp` and the
 kernel is configured with `CONFIG_SECCOMP` enabled. To check if your kernel
 supports `seccomp`:
 
-```bash
+```console
 $ grep CONFIG_SECCOMP= /boot/config-$(uname -r)
 CONFIG_SECCOMP=y
 ```
-
-> **Note**: `seccomp` profiles require seccomp 2.2.1 which is not available on
-> Ubuntu 14.04, Debian Wheezy, or Debian Jessie. To use `seccomp` on these
-> distributions, you must download the [latest static Linux binaries](/engine/installation/linux/docker-ce/binaries.md)
-> (rather than packages).
 
 ## Pass a profile for a container
 
@@ -31,8 +26,8 @@ protective while providing wide application compatibility. The default Docker
 profile can be found
 [here](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json).
 
-In effect, the profile is a whitelist which denies access to system calls by
-default, then whitelists specific system calls. The profile works by defining a
+In effect, the profile is a allowlist which denies access to system calls by
+default, then allowlists specific system calls. The profile works by defining a
 `defaultAction` of `SCMP_ACT_ERRNO` and overriding that action only for specific
 system calls. The effect of `SCMP_ACT_ERRNO` is to cause a `Permission Denied`
 error. Next, the profile defines a specific list of system calls which are fully
@@ -47,7 +42,7 @@ When you run a container, it uses the default profile unless you override it
 with the `--security-opt` option. For example, the following explicitly
 specifies a policy:
 
-```bash
+```console
 $ docker run --rm \
              -it \
              --security-opt seccomp=/path/to/seccomp/profile.json \
@@ -56,9 +51,9 @@ $ docker run --rm \
 
 ### Significant syscalls blocked by the default profile
 
-Docker's default seccomp profile is a whitelist which specifies the calls that
+Docker's default seccomp profile is an allowlist which specifies the calls that
 are allowed. The table below lists the significant (but not all) syscalls that
-are effectively blocked because they are not on the whitelist. The table includes
+are effectively blocked because they are not on the Allowlist. The table includes
 the reason each syscall is blocked rather than white-listed.
 
 | Syscall             | Description                                                                                                                           |
@@ -68,7 +63,7 @@ the reason each syscall is blocked rather than white-listed.
 | `bpf`               | Deny loading potentially persistent bpf programs into kernel, already gated by `CAP_SYS_ADMIN`.              |
 | `clock_adjtime`     | Time/date is not namespaced. Also gated by `CAP_SYS_TIME`.                                                   |
 | `clock_settime`     | Time/date is not namespaced. Also gated by `CAP_SYS_TIME`.                                                   |
-| `clone`             | Deny cloning new namespaces. Also gated by `CAP_SYS_ADMIN` for CLONE_* flags, except `CLONE_USERNS`.         |
+| `clone`             | Deny cloning new namespaces. Also gated by `CAP_SYS_ADMIN` for CLONE_* flags, except `CLONE_NEWUSER`.         |
 | `create_module`     | Deny manipulation and functions on kernel modules. Obsolete. Also gated by `CAP_SYS_MODULE`.                 |
 | `delete_module`     | Deny manipulation and functions on kernel modules. Also gated by `CAP_SYS_MODULE`.                           |
 | `finit_module`      | Deny manipulation and functions on kernel modules. Also gated by `CAP_SYS_MODULE`.                           |
@@ -77,7 +72,7 @@ the reason each syscall is blocked rather than white-listed.
 | `init_module`       | Deny manipulation and functions on kernel modules. Also gated by `CAP_SYS_MODULE`.                           |
 | `ioperm`            | Prevent containers from modifying kernel I/O privilege levels. Already gated by `CAP_SYS_RAWIO`.             |
 | `iopl`              | Prevent containers from modifying kernel I/O privilege levels. Already gated by `CAP_SYS_RAWIO`.             |
-| `kcmp`              | Restrict process inspection capabilities, already blocked by dropping `CAP_PTRACE`.                          |
+| `kcmp`              | Restrict process inspection capabilities, already blocked by dropping `CAP_SYS_PTRACE`.                          |
 | `kexec_file_load`   | Sister syscall of `kexec_load` that does the same thing, slightly different arguments. Also gated by `CAP_SYS_BOOT`. |
 | `kexec_load`        | Deny loading a new kernel for later execution. Also gated by `CAP_SYS_BOOT`.                                 |
 | `keyctl`            | Prevent containers from using the kernel keyring, which is not namespaced.                                   |
@@ -91,9 +86,9 @@ the reason each syscall is blocked rather than white-listed.
 | `perf_event_open`   | Tracing/profiling syscall, which could leak a lot of information on the host.                                |
 | `personality`       | Prevent container from enabling BSD emulation. Not inherently dangerous, but poorly tested, potential for a lot of kernel vulns. |
 | `pivot_root`        | Deny `pivot_root`, should be privileged operation.                                                           |
-| `process_vm_readv`  | Restrict process inspection capabilities, already blocked by dropping `CAP_PTRACE`.                          |
-| `process_vm_writev` | Restrict process inspection capabilities, already blocked by dropping `CAP_PTRACE`.                          |
-| `ptrace`            | Tracing/profiling syscall, which could leak a lot of information on the host. Already blocked by dropping `CAP_PTRACE`. |
+| `process_vm_readv`  | Restrict process inspection capabilities, already blocked by dropping `CAP_SYS_PTRACE`.                          |
+| `process_vm_writev` | Restrict process inspection capabilities, already blocked by dropping `CAP_SYS_PTRACE`.                          |
+| `ptrace`            | Tracing/profiling syscall. Blocked in Linux kernel versions before 4.8 to avoid seccomp bypass. Tracing/profiling arbitrary processes is already blocked by dropping `CAP_SYS_PTRACE`, because it could leak a lot of information on the host. |
 | `query_module`      | Deny manipulation and functions on kernel modules. Obsolete.                                                  |
 | `quotactl`          | Quota syscall which could let containers disable their own resource limits or process accounting. Also gated by `CAP_SYS_ADMIN`. |
 | `reboot`            | Don't let containers reboot the host. Also gated by `CAP_SYS_BOOT`.                                           |
@@ -120,7 +115,7 @@ the reason each syscall is blocked rather than white-listed.
 You can pass `unconfined` to run a container without the default seccomp
 profile.
 
-```
+```console
 $ docker run --rm -it --security-opt seccomp=unconfined debian:jessie \
     unshare --map-root-user --user sh -c whoami
 ```

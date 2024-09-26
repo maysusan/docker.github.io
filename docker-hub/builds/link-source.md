@@ -8,13 +8,19 @@ redirect_from:
 - /docker-cloud/builds/link-source/
 ---
 
+{% include upgrade-cta.html
+  body="The Automated Builds feature is available for Docker Pro, Team, and Business users. Upgrade now to automatically build and push your images. If you are using automated builds for an open-source project, you can join our [Open Source Community](https://www.docker.com/community/open-source/application){: target='_blank' rel='noopener' class='_'} program to learn how Docker can support your project on Docker Hub."
+  header-text="This feature requires a Docker subscription"
+  target-url="https://www.docker.com/pricing?utm_source=docker&utm_medium=webreferral&utm_campaign=docs_driven_upgrade_auto_builds"
+%}
+
 To automate building and testing of your images, you link to your hosted source
 code service to Docker Hub so that it can access your source code
 repositories. You can configure this link for user accounts or
 organizations.
 
 
-> **Note**: If you are linking a source code provider to create autobuilds for a team, follow the instructions to [create a service account](/docker-hub/builds.md#service-users-for-team-autobuilds) for the team before linking the account as described below.
+> **Note**: If you are linking a source code provider to create autobuilds for a team, follow the instructions to [create a service account](index.md#service-users-for-team-autobuilds) for the team before linking the account as described below.
 
 ## Link to a GitHub user account
 
@@ -26,6 +32,10 @@ organizations.
 
     ![Linking source providers](images/linked-accounts.png)
 
+    > **Note**:  If you want to unlink your current GitHub account and relink to a new GitHub account, make sure to completely logout of [GitHub] (https://github.com/){: target="_blank" rel="noopener"
+    class="_"}  before linking via Docker Hub.
+
+
 4. Review the settings for the **Docker Hub Builder** OAuth application.
 
     ![Granting access to GitHub account](images/authorize-builder.png)
@@ -33,9 +43,9 @@ organizations.
     >**Note**: If you are the owner of any GitHub organizations, you might see
     options to grant Docker Hub access to them from this screen. You can also
     individually edit an organization's third-party access settings to grant or
-    revoke Docker Hub's access. See [Grant access to a GitHub
-    organization](link-source.md#grant-access-to-a-github-organization) to
-    learn more.
+    revoke Docker Hub's access. See
+    [Grant access to a GitHub organization](link-source.md#grant-access-to-a-github-organization)
+    to learn more.
 
 5. Click **Authorize docker** to save the link.
 
